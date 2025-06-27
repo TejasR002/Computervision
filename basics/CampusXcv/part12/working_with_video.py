@@ -38,7 +38,7 @@ if not ret:
     exit()
 
 x = frame.shape
-print( x)
+print(x)
 height, width = frame.shape[:2]
 
 # Define codec and create VideoWriter object
@@ -49,6 +49,7 @@ current_time = datetime.now().strftime("%H-%M-%S")
 file_name = f'OUTPUT_at_{current_time}.mp4'
 
 writer = cv2.VideoWriter(file_name, fourcc, 60, (width, height))
+
 
 while True:
     ret, frame = cap.read()
