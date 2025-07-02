@@ -13,9 +13,11 @@ output_video_path = "D:/cmputerVisionSimform/basics/predictedVideos/predicted_vi
 
 # Load input video
 cap = cv2.VideoCapture(input_video_path)
-width  =320 #int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-height =544 #int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+width  =  int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+height =  int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 fps    =  cap.get(cv2.CAP_PROP_FPS)
+print(f'FPS of video is {fps}')
+print(f'type of fps variable {type(fps)}')
 
 # Define video writer
 fourcc = cv2.VideoWriter_fourcc(*"mp4v")
@@ -33,6 +35,7 @@ while True:
 
     # Draw bounding boxes on the frame
     annotated_frame = results.plot()
+    annotated_frame = cv2.resize(annotated_frame, (width, height)) 
     cv2.imshow("displayed",annotated_frame)
     
     if cv2.waitKey(1) & 0xFF == ord("q"):
