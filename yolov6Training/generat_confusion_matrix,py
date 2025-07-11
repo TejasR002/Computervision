@@ -1,0 +1,49 @@
+from pycocotools.coco import COCO
+from pycocotools.cocoeval import COCOeval
+import numpy as np
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
+
+# Paths to your files
+gt_path = 'D:/yolov6 results/test_coco_gt_patched.json'       # Ground truth annotations
+pred_path = 'D:/yolov6 results/predictions_fixed.json'  # YOLOv6 generated predictions
+
+# Load annotations and predictions
+coco_gt = COCO(gt_path)
+coco_dt = coco_gt.loadRes(pred_path)
+
+# Initialize COCOEval and evaluate
+coco_eval = COCOeval(coco_gt, coco_dt, iouType='bbox')
+coco_eval.evaluate()
+coco_eval.accumulate()
+coco_eval.summarize()
+
+# Extract per-image matches
+gt_classes = []
+pred_classes = []
+
+for idx, img_id in enumerate(coco_gt.getImgIds()):
+    gt_ann_ids = coco_gt.getAnnIds(imgIds=img_id)
+    gt_anns = coco_gt.loadAnns(gt_ann_ids)
+    gt_labels = [ann['category_id'] for ann in gt_anns]
+
+    pred_anns = coco_dt.loadAnns(coco_dt.getAnnIds(imgIds=img_id))
+    pred_labels = [ann['category_id'] for ann in pred_anns if ann['score'] > 0.5]  # Adjust threshold as needed
+
+    # Simple 1-to-1 match logic (IoU-based matching would be better)
+    for pred_label, gt_label in zip(pred_labels, gt_labels):
+        pred_classes.append(pred_label)
+        gt_classes.append(gt_label)
+
+# Convert category IDs to class names (optional)
+cat_id_to_name = {cat['id']: cat['name'] for cat in coco_gt.loadCats(coco_gt.getCatIds())}
+gt_names = [cat_id_to_name[i] for i in gt_classes]
+pred_names = [cat_id_to_name[i] for i in pred_classes]
+
+# Create confusion matrix
+cm = confusion_matrix(gt_names, pred_names, labels=list(cat_id_to_name.values()))
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=list(cat_id_to_name.values()))
+disp.plot(xticks_rotation=45)
+plt.title("Confusion Matrix")
+plt.tight_layout()
+plt.show()
